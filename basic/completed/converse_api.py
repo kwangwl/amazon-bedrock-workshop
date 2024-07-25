@@ -4,6 +4,7 @@ import json
 session = boto3.Session()
 bedrock = session.client(service_name='bedrock-runtime')
 
+model_id = "anthropic.claude-3-sonnet-20240229-v1:0"
 message = {
     "role": "user",
     "content": [
@@ -12,7 +13,7 @@ message = {
 }
 
 response = bedrock.converse(
-    modelId="anthropic.claude-3-sonnet-20240229-v1:0",
+    modelId=model_id,
     messages=[message],
     inferenceConfig={
         "maxTokens": 2000,
