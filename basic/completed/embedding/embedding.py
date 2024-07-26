@@ -44,7 +44,7 @@ for text in text_items:
 
 input_item = EmbedItem(sys.argv[1])
 
-print(f"Closest matches for '{input_item.text}'")
+print(f"유사도 정렬 : '{input_item.text}'")
 print("----------------")
 cosine_comparisons = []
 
