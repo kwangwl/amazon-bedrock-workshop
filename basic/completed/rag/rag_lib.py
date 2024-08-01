@@ -1,57 +1,75 @@
-from langchain_community.embeddings import BedrockEmbeddings
-from langchain.indexes import VectorstoreIndexCreator
-from langchain_community.vectorstores import FAISS
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.document_loaders import PyPDFLoader
-from langchain_community.chat_models import BedrockChat
+import boto3
+import json
+import PyPDF2
+import numpy as np
+import faiss
 
 
-# LLM (Large Language Model) 생성 함수
-def create_llm():
-    model_kwargs = {
-        "max_tokens": 2000,
-        "temperature": 0
-    }
-    llm = BedrockChat(
-        model_id="anthropic.claude-3-sonnet-20240229-v1:0",
-        model_kwargs=model_kwargs
+def create_embeddings(text):
+    session = boto3.Session()
+    bedrock = session.client(service_name='bedrock-runtime')
+
+    response = bedrock.invoke_model(
+        body=json.dumps({"inputText": text}),
+        modelId="amazon.titan-embed-text-v2:0",
+        accept="application/json",
+        contentType="application/json"
     )
-    return llm
+
+    response_body = json.loads(response['body'].read())
+    return np.array(response_body['embedding'])
 
 
-# PDF 파일 로드 함수
 def load_pdf(file_path):
-    loader = PyPDFLoader(file_path=file_path)
-    return loader
+    text = ""
+    with open(file_path, "rb") as file:
+        reader = PyPDF2.PdfReader(file)
+        for page in reader.pages:
+            text += page.extract_text()
+    return text
 
 
-# 텍스트 분할기 생성 함수
-def create_text_splitter(chunk_size=1000, chunk_overlap=100):
-    text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=chunk_size,
-        chunk_overlap=chunk_overlap
+def create_text_splitter(text, chunk_size=1000, chunk_overlap=100):
+    chunks = []
+    for i in range(0, len(text), chunk_size - chunk_overlap):
+        chunks.append(text[i:i + chunk_size])
+    return chunks
+
+
+def create_vector_index(embeddings):
+    dimension = embeddings[0].shape[0]
+    index = faiss.IndexFlatL2(dimension)
+    index.add(np.array(embeddings))
+    return index
+
+
+def generate_rag_response(index, question, documents):
+    session = boto3.Session()
+    llm = session.client(service_name='bedrock-runtime')
+
+    question_embedding = create_embeddings(question)
+    _, top_indices = index.search(np.array([question_embedding]), 4)
+    top_texts = [documents[i] for i in top_indices[0]]
+    rag_content = "\n\n".join(top_texts)
+
+    message = {
+        "role": "user",
+        "content": [
+            {"text": rag_content},
+            {"text": "위 내용을 바탕으로 다음 질문에 답해주세요 : "},
+            {"text": question}
+        ]
+    }
+
+    response = llm.converse(
+        modelId="anthropic.claude-3-sonnet-20240229-v1:0",
+        messages=[message],
+        inferenceConfig={
+            "maxTokens": 2000,
+            "temperature": 0,
+            "topP": 0.9,
+            "stopSequences": []
+        },
     )
-    return text_splitter
 
-
-# 임베딩 생성 함수
-def create_embeddings(model_id="amazon.titan-embed-text-v2:0"):
-    embeddings = BedrockEmbeddings(model_id=model_id)
-    return embeddings
-
-
-# 벡터 인덱스 생성 함수
-def create_vector_index(embeddings, text_splitter, loader):
-    index_creator = VectorstoreIndexCreator(
-        vectorstore_cls=FAISS,
-        embedding=embeddings,
-        text_splitter=text_splitter
-    )
-    index_from_loader = index_creator.from_loaders([loader])
-    return index_from_loader
-
-
-# RAG (Retrieval-Augmented Generation) 응답 생성 함수
-def generate_rag_response(index, question, llm):
-    response_text = index.query(question=question, llm=llm)
-    return response_text
+    return response['output']['message']['content'][0]['text'], top_texts
