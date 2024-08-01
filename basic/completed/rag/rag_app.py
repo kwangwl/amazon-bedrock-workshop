@@ -13,11 +13,11 @@ if 'vector_index' not in st.session_state:
         st.session_state.documents = chunks
         st.session_state.vector_index = glib.create_vector_index(embeddings)
 
-input_text = st.text_area("Input text", label_visibility="collapsed")
+input_text = st.text_area("텍스트 입력", label_visibility="collapsed")
 go_button = st.button("Go", type="primary")
 
 if go_button:
-    with st.spinner("Working..."):
+    with st.spinner("응답중..."):
         response_contents, search_results = glib.generate_rag_response(
             index=st.session_state.vector_index,
             question=input_text,
