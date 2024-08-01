@@ -1,62 +1,57 @@
-import itertools
-import boto3
-import chromadb
-from chromadb.utils.embedding_functions import AmazonBedrockEmbeddingFunction
+from langchain_community.embeddings import BedrockEmbeddings
+from langchain.indexes import VectorstoreIndexCreator
+from langchain_community.vectorstores import FAISS
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_community.document_loaders import PyPDFLoader
+from langchain_community.chat_models import BedrockChat
 
 
-def get_collection(path, collection_name):
-    session = boto3.Session()
-    embedding_function = AmazonBedrockEmbeddingFunction(session=session, model_name="amazon.titan-embed-text-v2:0")
-
-    client = chromadb.PersistentClient(path=path)
-    collection = client.get_collection(collection_name, embedding_function=embedding_function)
-
-    return collection
-
-
-def get_vector_search_results(collection, question):
-    results = collection.query(
-        query_texts=[question],
-        n_results=4
-    )
-
-    return results
-
-
-def get_rag_response(question):
-    session = boto3.Session()
-    bedrock = session.client(service_name='bedrock-runtime')
-
-    collection = get_collection("../../data/chroma", "bedrock_faqs_collection")
-
-    search_results = get_vector_search_results(collection, question)
-
-    flattened_results_list = list(
-        itertools.chain(*search_results['documents']))  # flatten the list of lists returned by chromadb
-
-    rag_content = "\n\n".join(flattened_results_list)
-    print(rag_content)
-
-    message = {
-        "role": "user",
-        "content": [
-            {"text": rag_content},
-            {"text": "위 내용을 바탕으로 다음 질문에 답해주세요 : "},
-            {"text": question}
-        ]
+# LLM (Large Language Model) 생성 함수
+def create_llm():
+    model_kwargs = {
+        "max_tokens": 2000,
+        "temperature": 0
     }
-
-    response = bedrock.converse(
-        modelId="anthropic.claude-3-sonnet-20240229-v1:0",
-        messages=[message],
-        inferenceConfig={
-            "maxTokens": 2000,
-            "temperature": 0,
-            "topP": 0.9,
-            "stopSequences": []
-        },
+    llm = BedrockChat(
+        model_id="anthropic.claude-3-sonnet-20240229-v1:0",
+        model_kwargs=model_kwargs
     )
+    return llm
 
-    return response['output']['message']['content'][0]['text'], flattened_results_list
+
+# PDF 파일 로드 함수
+def load_pdf(file_path):
+    loader = PyPDFLoader(file_path=file_path)
+    return loader
 
 
+# 텍스트 분할기 생성 함수
+def create_text_splitter(chunk_size=1000, chunk_overlap=100):
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=chunk_size,
+        chunk_overlap=chunk_overlap
+    )
+    return text_splitter
+
+
+# 임베딩 생성 함수
+def create_embeddings(model_id="amazon.titan-embed-text-v2:0"):
+    embeddings = BedrockEmbeddings(model_id=model_id)
+    return embeddings
+
+
+# 벡터 인덱스 생성 함수
+def create_vector_index(embeddings, text_splitter, loader):
+    index_creator = VectorstoreIndexCreator(
+        vectorstore_cls=FAISS,
+        embedding=embeddings,
+        text_splitter=text_splitter
+    )
+    index_from_loader = index_creator.from_loaders([loader])
+    return index_from_loader
+
+
+# RAG (Retrieval-Augmented Generation) 응답 생성 함수
+def generate_rag_response(index, question, llm):
+    response_text = index.query(question=question, llm=llm)
+    return response_text
