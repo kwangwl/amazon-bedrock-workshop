@@ -1,6 +1,5 @@
 boto3
 numpy
 streamlit
-langchain
-langchain_community
-fitz
+PyPDF2
+

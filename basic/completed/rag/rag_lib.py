@@ -56,7 +56,7 @@ def generate_rag_response(index, question, documents):
         "role": "user",
         "content": [
             {"text": rag_content},
-            {"text": "위 내용을 바탕으로 다음 질문에 답해주세요 : "},
+            {"text": "위 내용을 바탕으로 다음 질문에 답해주세요. 단 내용과 관련 없는 질문은 답변이 어렵다고 알려주세요."},
             {"text": question}
         ]
     }
