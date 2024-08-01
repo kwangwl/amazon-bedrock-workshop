@@ -9,9 +9,8 @@ if 'vector_index' not in st.session_state:
         pdf_path = "../../data/Amazon-com-Inc-2023-Shareholder-Letter.pdf"
         texts = glib.load_pdf(pdf_path)
         chunks = glib.create_text_splitter(texts)
-        st.session_state.documents = chunks
-
         embeddings = [glib.create_embeddings(chunk) for chunk in chunks]
+        st.session_state.documents = chunks
         st.session_state.vector_index = glib.create_vector_index(embeddings)
 
 input_text = st.text_area("Input text", label_visibility="collapsed")
