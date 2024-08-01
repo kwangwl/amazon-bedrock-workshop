@@ -1,12 +1,10 @@
 import boto3
 
-
 def create_message(role, text):
     return {
         "role": role,
         "content": [{"text": text}]
     }
-
 
 def converse_with_model(message_history, new_text=None):
     if len(message_history) > 40:
