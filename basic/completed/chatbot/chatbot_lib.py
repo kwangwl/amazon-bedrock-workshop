@@ -8,13 +8,6 @@ def create_message(role, text):
     }
 
 
-def format_messages_for_api(chat_messages):
-    messages = []
-    for chat_msg in chat_messages:
-        messages.append(chat_msg)
-    return messages
-
-
 def converse_with_model(message_history, new_text=None):
     if len(message_history) > 40:
         message_history.clear()
@@ -26,7 +19,7 @@ def converse_with_model(message_history, new_text=None):
     new_message = create_message('user', new_text)
     message_history.append(new_message)
 
-    messages = format_messages_for_api(message_history)
+    messages = message_history
     response = bedrock.converse(
         modelId="anthropic.claude-3-sonnet-20240229-v1:0",
         messages=messages,
