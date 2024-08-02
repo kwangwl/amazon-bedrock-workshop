@@ -1,7 +1,7 @@
 import boto3
 
 
-def get_streaming_response(prompt, transcription_text, response_placeholder):
+def get_streaming_response(prompt_input, transcription_text, response_placeholder):
     session = boto3.Session()
     bedrock = session.client(service_name='bedrock-runtime')
 
@@ -10,7 +10,7 @@ def get_streaming_response(prompt, transcription_text, response_placeholder):
         "content": [
             {"text": f"<transcript>{transcription_text}</transcript>"},
             {"text": "<transcript> 에는 상담원과 고객간의 통화 녹취가 기록되어 있습니다. 이 녹취를 바탕으로 답변해주세요."},
-            {"text": prompt}
+            {"text": prompt_input}
         ]
     }
 
