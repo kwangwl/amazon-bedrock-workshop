@@ -10,6 +10,8 @@ s3 = boto3.client('s3')
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table('restaurant_bookings')
 
+# https://medium.com/@sohambutala7/guide-to-aws-lambda-layers-and-api-gateway-integration-9c5c8b931080
+
 
 def get_stock_chart(ticker):
     bucket_name = 'agent-test-kw'

@@ -42,4 +42,4 @@ if submit_button and input_text:
                     st.subheader(trace_type)
                     for trace in traces:
                         data = json.loads(trace)
-                        st.write(data)
+                        st.json(data)

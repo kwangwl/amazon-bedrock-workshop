@@ -3,8 +3,6 @@ import io
 import boto3
 from datetime import datetime, timedelta
 
-# https://stockanalysis.com/stocks/aapl/forecast/
-
 
 def fetch_and_upload_financial_statements(ticker, bucket_name):
     # 티커에 점(.)이 포함되어 있는 경우, 점 이전의 부분만 사용
@@ -31,6 +29,7 @@ def fetch_and_upload_financial_statements(ticker, bucket_name):
     # S3에 업로드
     s3 = boto3.client('s3')
     s3.put_object(Bucket=bucket_name, Body=csv_buffer.getvalue(), Key=f"{ticker}_balance_sheet.csv")
+
 
 def fetch_and_upload_stock_data(ticker, bucket_name):
     # 오늘 날짜와 500일 전 날짜 계산
