@@ -8,23 +8,19 @@ st.title("Bedrock Agent Interaction")
 
 # 환경 변수에서 에이전트 ID 및 별칭 ID 가져오기
 agent_id = "YL5VOSKPEY"
-agent_alias_id = "BI4NJ6MEIE"
-
-# 세션 상태 초기화
-if 'session_id' not in st.session_state:
-    st.session_state.session_id = str(uuid.uuid4())
+agent_alias_id = "BI4NJ6MEIE    "
 
 # 텍스트 입력 영역
-input_text = st.text_area("질문을 입력하세요", label_visibility="collapsed")
+input_text = st.text_area("종목명을 입력하세요", label_visibility="collapsed")
 submit_button = st.button("Submit", type="primary")
 
 if submit_button and input_text:
     with st.spinner("응답 생성 중..."):
-        # 에이전트 호출
+        # 에이전트 호출 (세션은 항상 초기화 하도록 구성)
         response = glib.get_agent_response(
             agent_id,
             agent_alias_id,
-            st.session_state.session_id,
+            str(uuid.uuid4()),
             input_text
         )
 
