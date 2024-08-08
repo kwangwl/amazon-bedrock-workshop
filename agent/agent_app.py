@@ -3,8 +3,8 @@ import agent_lib as glib
 import uuid
 
 
-st.set_page_config(page_title="Bedrock Agent Interaction")
-st.title("Bedrock Agent Interaction")
+st.set_page_config(page_title="Stock Agent")
+st.title("Stock Agent")
 
 # 환경 변수에서 에이전트 ID 및 별칭 ID 가져오기
 agent_id = "YL5VOSKPEY"
