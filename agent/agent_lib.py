@@ -6,7 +6,7 @@ def get_agent_response(agent_id, agent_alias_id, session_id, prompt):
 
     # Create a Boto3 client for the Bedrock Runtime service
     session = boto3.Session()
-    bedrock_agent = session.client(service_name='bedrock-agent-runtime')
+    bedrock_agent = session.client(service_name='bedrock-agent-runtime', region_name='us-west-2')
 
     # Invoke the Bedrock agent with the specified parameters
     response = bedrock_agent.invoke_agent(
@@ -36,7 +36,7 @@ def get_agent_response(agent_id, agent_alias_id, session_id, prompt):
             if "orchestrationTrace" in event["trace"]["trace"]:
                 if "orchestrationTrace" not in trace:
                     trace["orchestrationTrace"] = []
-                trace["orchestrationTrace"].append(event["trace"]["trace"][trace_type])
+                trace["orchestrationTrace"].append(event["trace"]["trace"]["orchestrationTrace"])
 
     # Return the processed output, citations, and trace information
     return {
