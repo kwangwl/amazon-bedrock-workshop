@@ -36,7 +36,7 @@ def get_analyst_report(ticker):
     p_tags = soup.select("p")[:2]
 
     # 각 <p> 태그 내부의 텍스트 추출
-    return [p.get_text(strip=True) for p in p_tags]
+    return json.dumps([p.get_text(strip=True) for p in p_tags])
 
 
 def get_named_parameter(event, name):

@@ -1,6 +1,7 @@
 import boto3
 from botocore.exceptions import ClientError
 
+
 def invoke_agent(agent_id, agent_alias_id, session_id, prompt):
     try:
         client = boto3.session.Session().client(service_name="bedrock-agent-runtime")
