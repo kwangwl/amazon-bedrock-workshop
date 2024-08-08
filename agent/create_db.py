@@ -3,6 +3,8 @@ import io
 import boto3
 from datetime import datetime, timedelta
 
+# https://stockanalysis.com/stocks/aapl/forecast/
+
 
 def fetch_and_upload_financial_statements(ticker, bucket_name):
     # 티커에 점(.)이 포함되어 있는 경우, 점 이전의 부분만 사용
@@ -33,11 +35,11 @@ def fetch_and_upload_financial_statements(ticker, bucket_name):
 def fetch_and_upload_stock_data(ticker, bucket_name):
     # 오늘 날짜와 500일 전 날짜 계산
     end_date = datetime.today().date()
-    start_date = end_date - timedelta(days=700)
+    start_date = end_date - timedelta(days=300)
 
     # 주가 정보 가져오기
     data = yf.download(ticker, start=start_date, end=end_date)
-
+    data = data["Close"]
     # CSV 파일로 저장
     csv_buffer = io.StringIO()
     data.to_csv(csv_buffer)
@@ -53,5 +55,5 @@ if __name__ == "__main__":
     bucket_name = 'agent-test-kw'
 
     # 주가 정보를 가져와 S3에 업로드
-    # fetch_and_upload_stock_data(ticker, bucket_name)
-    fetch_and_upload_financial_statements(ticker, bucket_name)
+    fetch_and_upload_stock_data(ticker, bucket_name)
+    # fetch_and_upload_financial_statements(ticker, bucket_name)
