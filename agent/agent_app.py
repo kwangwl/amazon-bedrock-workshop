@@ -1,6 +1,7 @@
 import streamlit as st
 import agent_lib as glib
 import uuid
+import json
 
 
 st.set_page_config(page_title="Stock Agent")
@@ -8,7 +9,7 @@ st.title("Stock Agent")
 
 # 환경 변수에서 에이전트 ID 및 별칭 ID 가져오기
 agent_id = "YL5VOSKPEY"
-agent_alias_id = "BI4NJ6MEIE    "
+agent_alias_id = "BI4NJ6MEIE"
 
 # 텍스트 입력 영역
 input_text = st.text_area("종목명을 입력하세요", label_visibility="collapsed")
@@ -40,4 +41,5 @@ if submit_button and input_text:
                 for trace_type, traces in response["trace"].items():
                     st.subheader(trace_type)
                     for trace in traces:
-                        st.json(trace)
+                        data = json.loads(trace)
+                        st.write(data)
