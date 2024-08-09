@@ -4,13 +4,15 @@ import boto3
 import io
 import csv
 import requests
-from bs4 import BeautifulSoup
+import datetime
+
+# from bs4 import BeautifulSoup
+# import yfinance as yf
+
 
 s3 = boto3.client('s3')
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table('restaurant_bookings')
-
-# https://medium.com/@sohambutala7/guide-to-aws-lambda-layers-and-api-gateway-integration-9c5c8b931080
 
 
 def get_stock_chart(ticker):
@@ -25,7 +27,14 @@ def get_stock_chart(ticker):
     csv_reader = csv.DictReader(io.StringIO(content))
     json_data = json.dumps([row for row in csv_reader])
 
-    return json_data
+    end_date = datetime.today().date()
+    start_date = end_date - timedelta(days=300)
+
+    # 주가 정보 가져오기
+    data = yf.download(ticker, start=start_date, end=end_date)
+    data = data["Close"]
+
+    return data
 
 
 def get_analyst_report(ticker):
@@ -118,49 +127,11 @@ def lambda_handler(event, context):
     # name of the function that should be invoked
     function = event.get('function', '')
 
-    # parameters to invoke function with
-    parameters = event.get('parameters', [])
-
-    if function == 'get_booking_details':
-        booking_id = get_named_parameter(event, "booking_id")
-        if booking_id:
-            response = str(get_booking_details(booking_id))
-            responseBody = {'TEXT': {'body': json.dumps(response)}}
-        else:
-            responseBody = {'TEXT': {'body': 'Missing booking_id parameter'}}
-
-    elif function == 'create_booking':
-        date = get_named_parameter(event, "date")
-        name = get_named_parameter(event, "name")
-        hour = get_named_parameter(event, "hour")
-        num_guests = get_named_parameter(event, "num_guests")
-
-        if date and hour and num_guests:
-            response = str(create_booking(date, name, hour, num_guests))
-            responseBody = {'TEXT': {'body': json.dumps(response)}}
-        else:
-            responseBody = {'TEXT': {'body': 'Missing required parameters'}}
-
-    elif function == 'delete_booking':
-        booking_id = get_named_parameter(event, "booking_id")
-        if booking_id:
-            response = str(delete_booking(booking_id))
-            responseBody = {'TEXT': {'body': json.dumps(response)}}
-        else:
-            responseBody = {'TEXT': {'body': 'Missing booking_id parameter'}}
-
-    elif function == 'get_stock_chart':
+    if function == 'get_stock_chart':
         # 예시로 사용할 주식 티커
         ticker = get_named_parameter(event, "ticker")
         hist = get_stock_chart(ticker)
         responseBody = {'TEXT': {'body': hist}}
-
-    elif function == 'get_analyst_report':
-        # 예시로 사용할 주식 티커
-        ticker = get_named_parameter(event, "ticker")
-        hist = get_analyst_report(ticker)
-        responseBody = {'TEXT': {'body': hist}}
-
     else:
         responseBody = {'TEXT': {'body': 'Invalid function'}}
 
@@ -176,3 +147,4 @@ def lambda_handler(event, context):
     print("Response: {}".format(function_response))
 
     return function_response
+
