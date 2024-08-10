@@ -41,5 +41,6 @@ if submit_button and input_text:
                 for trace_type, traces in response["trace"].items():
                     st.subheader(trace_type)
                     for trace in traces:
-                        data = json.loads(trace)
-                        st.json(data)
+                        st.json(trace)
+                        # data = json.loads(trace)
+                        # st.write(trace)

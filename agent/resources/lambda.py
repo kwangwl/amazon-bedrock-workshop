@@ -19,10 +19,14 @@ def get_stock_chart(ticker):
 
     # 주가 정보 가져오기
     data = yf.download(ticker, start=start_date, end=end_date)
-    data = data["Close"]
+    stock_close = data["Close"]
 
-    # data_dict = {date.strftime('%Y-%m-%d'): round(value, 2) for date, value in data.items()}
-    return data.to_json()
+    prompt = "주식의 날짜별 종가 정보는 다음과 같습니다:\n"
+    for index, close in stock_close.items():
+        date = index.strftime('%Y-%m-%d')
+        prompt += f"{date}:{round(close, 2)}\n"
+
+    return prompt
 
 
 def get_stock_balance(ticker):
@@ -34,12 +38,12 @@ def get_stock_balance(ticker):
         balance = balance.iloc[:, :3]
     balance = balance.dropna(how="any")
 
-    prompt = "이 데이터는 주식의 재무제표 정보를 나타냅니다:\n"
+    prompt = "주식의 날짜별 재무제표 정보는 다음과 같습니다:\n"
     for col in balance.columns:
         date = col.strftime('%Y-%m-%d')
-        prompt += f"\n{date}:\n"
+        prompt += f"{date}:\n"
         for item, value in balance[col].items():
-            prompt += f"{item}: {value}\n"
+            prompt += f"{item}:{value}\n"
     return prompt
 
 
@@ -49,8 +53,8 @@ def get_recommendations(ticker):
 
     prompt = "주식의 시간대별 애널리스트 추천 정도는 다음과 같습니다.:\n"
     for index, row in recommendations.iterrows():
-        prompt += (f"{row['period']}에는 강력 매수 {row['strongBuy']}건, 매수 {row['buy']}건, 보유 {row['hold']}건,"
-                   f" 매도 {row['sell']}건, 강력 매도 {row['strongSell']} 입니다.\n")
+        prompt += (f"{row['period']}: 강력 매수 {row['strongBuy']}건, 매수 {row['buy']}건, 보유 {row['hold']}건,"
+                   f" 매도 {row['sell']}건, 강력 매도 {row['strongSell']} 건\n")
     return prompt
 
 
@@ -61,22 +65,10 @@ def lambda_handler(event, context):
     # name of the function that should be invoked
     function = event.get('function', '')
 
-    if function == 'get_stock_chart':
+    if function in ['get_stock_chart', 'get_stock_balance', 'get_recommendations']:
         # 예시로 사용할 주식 티커
         ticker = get_named_parameter(event, "ticker")
         output = get_stock_chart(ticker)
-        responseBody = {'TEXT': {'body': json.dumps(output)}}
-
-    elif function == 'get_stock_balance':
-        # 예시로 사용할 주식 티커
-        ticker = get_named_parameter(event, "ticker")
-        output = get_stock_balance(ticker)
-        responseBody = {'TEXT': {'body': json.dumps(output)}}
-
-    elif function == 'get_recommendations':
-        # 예시로 사용할 주식 티커
-        ticker = get_named_parameter(event, "ticker")
-        output = get_recommendations(ticker)
         responseBody = {'TEXT': {'body': json.dumps(output)}}
 
     else:
