@@ -1,53 +1,6 @@
 import json
-import uuid
-import boto3
-import io
-import csv
-import requests
-import datetime
-
-# from bs4 import BeautifulSoup
-# import yfinance as yf
-
-
-s3 = boto3.client('s3')
-dynamodb = boto3.resource('dynamodb')
-table = dynamodb.Table('restaurant_bookings')
-
-
-def get_stock_chart(ticker):
-    bucket_name = 'agent-test-kw'
-    file_key = f"{ticker.upper()}.csv"
-
-    # S3에서 파일 가져오기
-    response = s3.get_object(Bucket=bucket_name, Key=file_key)
-    content = response['Body'].read().decode('utf-8')
-
-    # CSV 파일을 pandas DataFrame으로 읽기
-    csv_reader = csv.DictReader(io.StringIO(content))
-    json_data = json.dumps([row for row in csv_reader])
-
-    end_date = datetime.today().date()
-    start_date = end_date - timedelta(days=300)
-
-    # 주가 정보 가져오기
-    data = yf.download(ticker, start=start_date, end=end_date)
-    data = data["Close"]
-
-    return data
-
-
-def get_analyst_report(ticker):
-    headers = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:87.0) Gecko/20100101 Firefox/87.0'}
-    url = f"https://stockanalysis.com/stocks/{ticker}/forecast/"
-
-    response = requests.get(url, headers=headers)
-    soup = BeautifulSoup(response.content, 'html.parser')
-
-    p_tags = soup.select("p")[:2]
-
-    # 각 <p> 태그 내부의 텍스트 추출
-    return json.dumps([p.get_text(strip=True) for p in p_tags])
+import yfinance as yf
+from datetime import datetime, timedelta
 
 
 def get_named_parameter(event, name):
@@ -60,64 +13,38 @@ def get_named_parameter(event, name):
     return None  # 파라미터가 없을 경우 None 반환
 
 
-def get_booking_details(booking_id):
-    """
-    Retrieve details of a restaurant booking
+def get_stock_chart(ticker):
+    end_date = datetime.today().date()
+    start_date = end_date - timedelta(days=500)
 
-    Args:
-        booking_id (string): The ID of the booking to retrieve
-    """
-    try:
-        response = table.get_item(Key={'booking_id': booking_id})
-        if 'Item' in response:
-            return response['Item']
-        else:
-            return {'message': f'No booking found with ID {booking_id}'}
-    except Exception as e:
-        return {'error': str(e)}
+    # 주가 정보 가져오기
+    data = yf.download(ticker, start=start_date, end=end_date)
+    data = data["Close"]
+
+    # data_dict = {date.strftime('%Y-%m-%d'): round(value, 2) for date, value in data.items()}
+    return data.to_json()
 
 
-def create_booking(date, name, hour, num_guests):
-    """
-    Create a new restaurant booking
+def get_stock_balance(ticker):
+    # yfinance를 사용하여 주식 티커에 해당하는 회사 정보 가져오기
+    company = yf.Ticker(ticker)
 
-    Args:
-        date (string): The date of the booking
-        name (string): Name to idenfity your reservation
-        hour (string): The hour of the booking
-        num_guests (integer): The number of guests for the booking
-    """
-    try:
-        booking_id = str(uuid.uuid4())[:8]
-        table.put_item(
-            Item={
-                'booking_id': booking_id,
-                'date': date,
-                'name': name,
-                'hour': hour,
-                'num_guests': num_guests
-            }
-        )
-        return {'booking_id': booking_id}
-    except Exception as e:
-        return {'error': str(e)}
+    # 대차대조표 가져오기
+    balance_sheet = company.balance_sheet
 
+    # 대차대조표에서 최근 3년간의 데이터 선택
+    if balance_sheet.shape[1] >= 3:
+        balance_sheet = balance_sheet.iloc[:, :3]  # 최근 3년간의 데이터만 선택
 
-def delete_booking(booking_id):
-    """
-    Delete an existing restaurant booking
+    # 결측값이 있는 행 제거
+    balance_sheet = balance_sheet.dropna(how="any")
 
-    Args:
-        booking_id (str): The ID of the booking to delete
-    """
-    try:
-        response = table.delete_item(Key={'booking_id': booking_id})
-        if response['ResponseMetadata']['HTTPStatusCode'] == 200:
-            return {'message': f'Booking with ID {booking_id} deleted successfully'}
-        else:
-            return {'message': f'Failed to delete booking with ID {booking_id}'}
-    except Exception as e:
-        return {'error': str(e)}
+    # output 정제
+    balance_sheet_dict = {}
+    for date, value in balance_sheet.items():
+        balance_sheet_dict.update({date.strftime('%Y-%m-%d'): {key: int(item) for key, item in value.items()}})
+
+    return balance_sheet_dict
 
 
 def lambda_handler(event, context):
@@ -130,8 +57,15 @@ def lambda_handler(event, context):
     if function == 'get_stock_chart':
         # 예시로 사용할 주식 티커
         ticker = get_named_parameter(event, "ticker")
-        hist = get_stock_chart(ticker)
-        responseBody = {'TEXT': {'body': hist}}
+        output = get_stock_chart(ticker)
+        responseBody = {'TEXT': {'body': json.dumps(output)}}
+
+    elif function == 'get_stock_balance':
+        # 예시로 사용할 주식 티커
+        ticker = get_named_parameter(event, "ticker")
+        output = get_stock_balance(ticker)
+        responseBody = {'TEXT': {'body': json.dumps(output)}}
+
     else:
         responseBody = {'TEXT': {'body': 'Invalid function'}}
 
@@ -148,3 +82,21 @@ def lambda_handler(event, context):
 
     return function_response
 
+
+if __name__ == "__main__":
+    msft = yf.Ticker("MSFT")
+
+    # 설정
+    event = {
+      "function": "get_stock_chart",
+      "parameters": [
+        {
+          "name": "ticker",
+          "value": "AAPL"
+        }
+      ],
+      "messageVersion": 4
+    }
+
+    # 주가 정보를 가져와 S3에 업로드
+    lambda_handler(event, {})
