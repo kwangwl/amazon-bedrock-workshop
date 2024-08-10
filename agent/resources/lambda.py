@@ -64,21 +64,25 @@ def lambda_handler(event, context):
 
     # name of the function that should be invoked
     function = event.get('function', '')
+    ticker = get_named_parameter(event, "ticker")
 
-    if function in ['get_stock_chart', 'get_stock_balance', 'get_recommendations']:
-        # 예시로 사용할 주식 티커
-        ticker = get_named_parameter(event, "ticker")
-        output = get_stock_chart(ticker)
-        responseBody = {'TEXT': {'body': json.dumps(output)}}
+    if function == 'get_stock_chart':
+        prompt = get_stock_chart(ticker)
+
+    elif function == 'get_stock_balance':
+        prompt = get_stock_balance(ticker)
+
+    elif function == 'get_recommendations':
+        prompt = get_recommendations(ticker)
 
     else:
-        responseBody = {'TEXT': {'body': 'Invalid function'}}
+        prompt = 'Invalid function'
 
     action_response = {
         'actionGroup': actionGroup,
         'function': function,
         'functionResponse': {
-            'responseBody': responseBody
+            'responseBody': {'TEXT': {'body': json.dumps(prompt, ensure_ascii=False)}}
         }
     }
 
