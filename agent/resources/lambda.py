@@ -14,19 +14,20 @@ def get_named_parameter(event, name):
 
 
 def get_stock_chart(ticker):
-    end_date = datetime.today().date()
-    start_date = end_date - timedelta(days=500)
+    today = datetime.today().date()
+    start_date = today - timedelta(days=500)
 
     # 주가 정보 가져오기
-    data = yf.download(ticker, start=start_date, end=end_date)
+    data = yf.download(ticker, start=start_date, end=today)
     stock_close = data["Close"]
 
-    prompt = "주식의 날짜별 종가 정보는 다음과 같습니다:\n"
+    output = {}
     for index, close in stock_close.items():
-        date = index.strftime('%Y-%m-%d')
-        prompt += f"{date}:{round(close, 2)}\n"
+        output.update({
+            index.strftime('%Y-%m-%d'): round(close, 2)
+        })
 
-    return prompt
+    return output
 
 
 def get_stock_balance(ticker):
@@ -38,24 +39,39 @@ def get_stock_balance(ticker):
         balance = balance.iloc[:, :3]
     balance = balance.dropna(how="any")
 
-    prompt = "주식의 날짜별 재무제표 정보는 다음과 같습니다:\n"
+    output = {}
     for col in balance.columns:
-        date = col.strftime('%Y-%m-%d')
-        prompt += f"{date}:\n"
+        output_date = {}
         for item, value in balance[col].items():
-            prompt += f"{item}:{value}\n"
-    return prompt
+            output_date.update({
+                item: value
+            })
+        output.update({col.strftime('%Y-%m-%d'): output_date})
+    return output
 
 
 def get_recommendations(ticker):
     stock = yf.Ticker(ticker)
     recommendations = stock.recommendations
 
-    prompt = "주식의 시간대별 애널리스트 추천 정도는 다음과 같습니다.:\n"
+    output = {}
     for index, row in recommendations.iterrows():
-        prompt += (f"{row['period']}: 강력 매수 {row['strongBuy']}건, 매수 {row['buy']}건, 보유 {row['hold']}건,"
-                   f" 매도 {row['sell']}건, 강력 매도 {row['strongSell']} 건\n")
-    return prompt
+        output.update({
+            row['period'] : {
+                'strongBuy': row['strongBuy'],
+                'buy': row['buy'],
+                'hold': row['hold'],
+                'sell': row['sell'],
+                'strongSell': row['strongSell'],
+
+            }
+        })
+    return output
+
+
+def get_today():
+    today = datetime.today().date()
+    return today.strftime('%Y-%m-%d')
 
 
 def lambda_handler(event, context):
@@ -64,25 +80,30 @@ def lambda_handler(event, context):
 
     # name of the function that should be invoked
     function = event.get('function', '')
-    ticker = get_named_parameter(event, "ticker")
 
-    if function == 'get_stock_chart':
-        prompt = get_stock_chart(ticker)
+    if function == 'get_today':
+        output = get_today()
+
+    elif function == 'get_stock_chart':
+        ticker = get_named_parameter(event, "ticker")
+        output = get_stock_chart(ticker)
 
     elif function == 'get_stock_balance':
-        prompt = get_stock_balance(ticker)
+        ticker = get_named_parameter(event, "ticker")
+        output = get_stock_balance(ticker)
 
     elif function == 'get_recommendations':
-        prompt = get_recommendations(ticker)
+        ticker = get_named_parameter(event, "ticker")
+        output = get_recommendations(ticker)
 
     else:
-        prompt = 'Invalid function'
+        output = 'Invalid function'
 
     action_response = {
         'actionGroup': actionGroup,
         'function': function,
         'functionResponse': {
-            'responseBody': {'TEXT': {'body': json.dumps(prompt, ensure_ascii=False)}}
+            'responseBody': {'TEXT': {'body': json.dumps(output)}}
         }
     }
 
@@ -95,7 +116,7 @@ def lambda_handler(event, context):
 if __name__ == "__main__":
     # 설정
     event = {
-      "function": "get_stock_balance",
+      "function": "get_today",
       "parameters": [
         {
           "name": "ticker",
