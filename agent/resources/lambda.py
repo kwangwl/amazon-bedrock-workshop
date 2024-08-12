@@ -49,7 +49,6 @@ def get_stock_balance(ticker):
         output.update({col.strftime('%Y-%m-%d'): output_date})
     return output
 
-
 def get_recommendations(ticker):
     stock = yf.Ticker(ticker)
     recommendations = stock.recommendations
@@ -112,19 +111,3 @@ def lambda_handler(event, context):
 
     return function_response
 
-
-if __name__ == "__main__":
-    # 설정
-    event = {
-      "function": "get_today",
-      "parameters": [
-        {
-          "name": "ticker",
-          "value": "AAPL"
-        }
-      ],
-      "messageVersion": 4
-    }
-
-    # 주가 정보를 가져와 S3에 업로드
-    lambda_handler(event, {})
