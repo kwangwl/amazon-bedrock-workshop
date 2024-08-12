@@ -9,7 +9,7 @@ st.title("Stock Agent")
 
 # 환경 변수에서 에이전트 ID 및 별칭 ID 가져오기
 agent_id = "YL5VOSKPEY"
-agent_alias_id = "WTIXW7HKYK"
+agent_alias_id = "EDMRGWU1H6"
 
 # 텍스트 입력 영역
 input_text = st.text_area("종목명을 입력하세요", label_visibility="collapsed")
