@@ -19,7 +19,6 @@ def get_agent_response(agent_id, agent_alias_id, session_id, prompt):
 
     # Initialize variables to store the output, citations, and trace information
     output_text = ""
-    citations = []
     trace = {}
 
     # Process each event in the response
@@ -28,8 +27,6 @@ def get_agent_response(agent_id, agent_alias_id, session_id, prompt):
         if "chunk" in event:
             chunk = event["chunk"]
             output_text += chunk["bytes"].decode()
-            if "attribution" in chunk:
-                citations.extend(chunk["attribution"]["citations"])
 
         # Extract trace information from all events
         if "trace" in event:
@@ -41,6 +38,5 @@ def get_agent_response(agent_id, agent_alias_id, session_id, prompt):
     # Return the processed output, citations, and trace information
     return {
         "output_text": output_text,
-        "citations": citations,
         "trace": trace
     }

@@ -49,6 +49,7 @@ def get_stock_balance(ticker):
         output.update({col.strftime('%Y-%m-%d'): output_date})
     return output
 
+
 def get_recommendations(ticker):
     stock = yf.Ticker(ticker)
     recommendations = stock.recommendations
