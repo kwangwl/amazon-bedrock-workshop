@@ -75,6 +75,7 @@ def get_recommendations(ticker):
 
 def lambda_handler(event, context):
     action_group = event.get('actionGroup', '')
+    message_version = event.get('messageVersion', '')
     function = event.get('function', '')
 
     if function == 'get_today':
@@ -103,7 +104,7 @@ def lambda_handler(event, context):
         }
     }
 
-    function_response = {'response': action_response, 'messageVersion': event['messageVersion']}
+    function_response = {'response': action_response, 'messageVersion': message_version}
     print("Response: {}".format(function_response))
 
     return function_response
