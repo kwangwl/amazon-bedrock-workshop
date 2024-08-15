@@ -4,20 +4,23 @@ from datetime import datetime, timedelta
 
 
 def get_named_parameter(event, name):
-    """
-    Lambda 이벤트에서 특정 이름의 파라미터 값을 가져옵니다.
-    """
+    """ Lambda 이벤트에서 특정 이름의 파라미터 값을 가져옵니다."""
     for param in event['parameters']:
         if param['name'] == name:
             return param['value']
-    return None  # 파라미터가 없을 경우 None 반환
+    return None
+
+
+def get_today():
+    today = datetime.today().date()
+    return today.strftime('%Y-%m-%d')
 
 
 def get_stock_chart(ticker):
+    """ yfinance 패키지를 통과 과거 주가 정보를 가져옵니다."""
     today = datetime.today().date()
     start_date = today - timedelta(days=500)
 
-    # 주가 정보 가져오기
     data = yf.download(ticker, start=start_date, end=today)
     stock_close = data["Close"]
 
@@ -31,9 +34,8 @@ def get_stock_chart(ticker):
 
 
 def get_stock_balance(ticker):
+    """ yfinance 패키지를 통과 최근 3년간의 재무제표를 가져옵니다."""
     company = yf.Ticker(ticker)
-
-    # 재무제표 가져와서 최근 3년간의 데이터 선택
     balance = company.balance_sheet
     if balance.shape[1] >= 3:
         balance = balance.iloc[:, :3]
@@ -47,17 +49,19 @@ def get_stock_balance(ticker):
                 item: value
             })
         output.update({col.strftime('%Y-%m-%d'): output_date})
+
     return output
 
 
 def get_recommendations(ticker):
+    """ yfinance 패키지를 통과 애널리스트들의 추천 정보를 가져옵니다."""
     stock = yf.Ticker(ticker)
     recommendations = stock.recommendations
 
     output = {}
     for index, row in recommendations.iterrows():
         output.update({
-            row['period'] : {
+            row['period']: {
                 'strongBuy': row['strongBuy'],
                 'buy': row['buy'],
                 'hold': row['hold'],
@@ -69,16 +73,8 @@ def get_recommendations(ticker):
     return output
 
 
-def get_today():
-    today = datetime.today().date()
-    return today.strftime('%Y-%m-%d')
-
-
 def lambda_handler(event, context):
-    # get the action group used during the invocation of the lambda function
-    actionGroup = event.get('actionGroup', '')
-
-    # name of the function that should be invoked
+    action_group = event.get('actionGroup', '')
     function = event.get('function', '')
 
     if function == 'get_today':
@@ -100,7 +96,7 @@ def lambda_handler(event, context):
         output = 'Invalid function'
 
     action_response = {
-        'actionGroup': actionGroup,
+        'actionGroup': action_group,
         'function': function,
         'functionResponse': {
             'responseBody': {'TEXT': {'body': json.dumps(output)}}
@@ -111,4 +107,3 @@ def lambda_handler(event, context):
     print("Response: {}".format(function_response))
 
     return function_response
-

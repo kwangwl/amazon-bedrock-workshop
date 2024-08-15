@@ -5,8 +5,8 @@ import uuid
 import json
 
 # config
-AGENT_ID = ""
-AGENT_ALIAS_ID = ""
+AGENT_ID = "YL5VOSKPEY"
+AGENT_ALIAS_ID = "CYZPPZOMRS"
 
 
 # function
