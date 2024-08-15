@@ -6,7 +6,7 @@ st.title("Retrieval-Augmented Generation")
 
 if 'vector_index' not in st.session_state:
     with st.spinner("Indexing document..."):
-        pdf_path = "../../resources/Amazon-com-Inc-2023-Shareholder-Letter.pdf"
+        pdf_path = "../../../resources/Amazon-com-Inc-2023-Shareholder-Letter.pdf"
         texts = glib.load_pdf(pdf_path)
         chunks = glib.create_text_splitter(texts)
         embeddings = [glib.create_embeddings(chunk) for chunk in chunks]
