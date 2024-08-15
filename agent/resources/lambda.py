@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 
 
 def get_named_parameter(event, name):
-    """ Lambda 이벤트에서 특정 이름의 파라미터 값을 가져옵니다."""
+    # Lambda 이벤트에서 특정 이름의 파라미터 값을 가져옵니다.
     for param in event['parameters']:
         if param['name'] == name:
             return param['value']
@@ -17,7 +17,7 @@ def get_today():
 
 
 def get_stock_chart(ticker):
-    """ yfinance 패키지를 통과 과거 주가 정보를 가져옵니다."""
+    # yfinance 패키지를 통과 과거 주가 정보를 가져옵니다.
     today = datetime.today().date()
     start_date = today - timedelta(days=500)
 
@@ -34,7 +34,7 @@ def get_stock_chart(ticker):
 
 
 def get_stock_balance(ticker):
-    """ yfinance 패키지를 통과 최근 3년간의 재무제표를 가져옵니다."""
+    # yfinance 패키지를 통과 최근 3년간의 재무제표를 가져옵니다.
     company = yf.Ticker(ticker)
     balance = company.balance_sheet
     if balance.shape[1] >= 3:
@@ -54,7 +54,7 @@ def get_stock_balance(ticker):
 
 
 def get_recommendations(ticker):
-    """ yfinance 패키지를 통과 애널리스트들의 추천 정보를 가져옵니다."""
+    # yfinance 패키지를 통과 애널리스트들의 추천 정보를 가져옵니다.
     stock = yf.Ticker(ticker)
     recommendations = stock.recommendations
 
