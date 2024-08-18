@@ -5,7 +5,7 @@ import sys
 def chunk_handler(chunk):
     print(chunk, end='')
 
-def get_streaming_response(prompt, streaming_callback):
+def get_streaming_response(prompt, model_id, streaming_callback):
     session = boto3.Session()
     bedrock = session.client(service_name='bedrock-runtime')
 
@@ -15,7 +15,7 @@ def get_streaming_response(prompt, streaming_callback):
     }
 
     response = bedrock.converse_stream(
-        modelId="anthropic.claude-3-sonnet-20240229-v1:0",
+        modelId=model_id,
         messages=[message],
         inferenceConfig={
             "maxTokens": 2000,
@@ -35,4 +35,4 @@ def get_streaming_response(prompt, streaming_callback):
             print("\n---- metrics ----")
             print(json.dumps(event['metadata']['metrics'], indent=4))
 
-get_streaming_response(sys.argv[1], chunk_handler)
+get_streaming_response(sys.argv[1], sys.argv[2], chunk_handler)
