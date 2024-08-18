@@ -1,5 +1,6 @@
 import boto3
 import yfinance as yf
+import sys
 
 tool_config = {
     "tools": [
@@ -54,6 +55,6 @@ def handle_tool_use(response):
                 if tool_use['name'] == 'get_stock_price':
                     return get_stock_price(tool_use['input']['ticker'])
 
-response = get_response("AMZN")
+response = get_response(sys.argv[1])
 stock_info = handle_tool_use(response)
 print(stock_info)
