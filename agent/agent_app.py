@@ -4,9 +4,10 @@ import pandas as pd
 import uuid
 import json
 
+
 # config
-AGENT_ID = "YL5VOSKPEY"
-AGENT_ALIAS_ID = "CYZPPZOMRS"
+AGENT_ID = ""
+AGENT_ALIAS_ID = ""
 
 
 # function
