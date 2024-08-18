@@ -52,6 +52,8 @@ def handle_tool_use(response):
         for tool_request in tool_requests:
             if 'toolUse' in tool_request:
                 tool_use = tool_request['toolUse']
+                print(f"Bedrock Response : {tool_request}")
+
                 if tool_use['name'] == 'get_stock_price':
                     return get_stock_price(tool_use['input']['ticker'])
 
