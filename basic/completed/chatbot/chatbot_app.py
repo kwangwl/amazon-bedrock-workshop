@@ -11,10 +11,13 @@ chat_container = st.container()
 input_text = st.chat_input("여기에서 챗봇과 채팅하세요")
 
 if input_text:
+    st.session_state.chat_history.append({"role": "user", "content": [{"text": input_text}]})
+
     with st.spinner("응답중..."):
-        exceed_limit = glib.converse_with_model(st.session_state.chat_history, input_text)
-        if exceed_limit:
-            st.warning("최대 메시지 수를 초과하여 메시지 기록이 초기화되었습니다.")
+        response = glib.get_response(st.session_state.chat_history)
+        output = glib.handle_response(response)
+
+        st.session_state.chat_history.append({"role": "assistant", "content": [{"text": output}]})
 
 for message in st.session_state.chat_history:
     with chat_container.chat_message(message['role']):

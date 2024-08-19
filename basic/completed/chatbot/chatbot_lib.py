@@ -7,7 +7,7 @@ tool_config = {
         {
             "toolSpec": {
                 "name": "get_stock_price",
-                "description": "주어진 ticker의 현재 주식 가격을 가져옵니다.",
+                "description": "현재 주식 가격을 가져옵니다.",
                 "inputSchema": {
                     "json": {
                         "type": "object",
@@ -27,11 +27,6 @@ tool_config = {
     ]
 }
 
-def create_message(role, text):
-    return {
-        "role": role,
-        "content": [{"text": text}]
-    }
 
 # Function to retrieve stock price
 def get_stock_price(ticker):
@@ -41,27 +36,11 @@ def get_stock_price(ticker):
     current_price = historical_data['Close'].iloc[0]
     return f"{ticker} 종가는 {date} 기준 {current_price:.2f}입니다"
 
-# Function to handle tool use
-def handle_tool_use(response):
-    if response.get('stopReason') == 'tool_use':
-        tool_requests = response['output']['message']['content']
-        for tool_request in tool_requests:
-            if 'toolUse' in tool_request:
-                tool_use = tool_request['toolUse']
-                if tool_use['name'] == 'get_stock_price':
-                    return get_stock_price(tool_use['input']['ticker'])
 
 # Function to converse with Bedrock model
-def converse_with_model(message_history, new_text=None):
-    if len(message_history) > 40:
-        message_history.clear()
-        return True
-
+def get_response(message_history):
     session = boto3.Session()
     bedrock = session.client(service_name='bedrock-runtime')
-
-    new_message = create_message('user', new_text)
-    message_history.append(new_message)
 
     response = bedrock.converse(
         modelId="anthropic.claude-3-sonnet-20240229-v1:0",
@@ -75,11 +54,19 @@ def converse_with_model(message_history, new_text=None):
         },
     )
 
-    tool_response = handle_tool_use(response)
-    if tool_response:
-        message_history.append({"role": "assistant", "content": [{"text": tool_response}]})
+    return response
+
+def handle_response(response):
+    output = None
+
+    if response.get('stopReason') == 'tool_use':
+        tool_requests = response['output']['message']['content']
+        for tool_request in tool_requests:
+            if 'toolUse' in tool_request:
+                tool_use = tool_request['toolUse']
+                if tool_use['name'] == 'get_stock_price':
+                    output = get_stock_price(tool_use['input']['ticker'])
     else:
         output = response['output']['message']['content'][0]['text']
-        message_history.append({"role": "assistant", "content": [{"text": output}]})
 
-    return False
+    return output
