@@ -1,7 +1,6 @@
 import boto3
 import yfinance as yf
 
-# Tool configuration for stock price retrieval
 tool_config = {
     "tools": [
         {
@@ -27,15 +26,12 @@ tool_config = {
     ]
 }
 
-
-# Function to retrieve stock price
 def get_stock_price(ticker):
     stock_data = yf.Ticker(ticker)
     historical_data = stock_data.history(period='1d')
     date = historical_data.index[0].strftime('%Y-%m-%d')
     current_price = historical_data['Close'].iloc[0]
     return f"{ticker} 종가는 {date} 기준 {current_price:.2f}입니다"
-
 
 # Function to converse with Bedrock model
 def get_response(message_history):
