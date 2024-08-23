@@ -1,0 +1,5 @@
+1. 워크샵 파일 압축 명령어
+zip -r project.zip . -x "*/.pyc" -x "*/__pycache__/*" -x ".idea/*" -x ".venv/*" -x "*/.DS_Store" -x ".DS_Store" -x ".git/*" -x "extra/*"
+
+2. asset curl 방법
+curl -o ec2vscode_python.yaml "asset static url“
