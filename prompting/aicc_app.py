@@ -13,9 +13,6 @@ TASK_INFO = {
 st.set_page_config(page_title="AICC")
 st.title("AICC - 자동차 보험 상담")
 
-# 오디오 파일 표시
-st.audio("../resources/aicc_transcription.mp3")
-
 # 녹취문을 확장 가능한 영역에 표시
 with open("../resources/aicc_transcription.txt", 'r', encoding='utf-8') as file:
     transcription_text = file.read()
