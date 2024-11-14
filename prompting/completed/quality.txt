@@ -44,12 +44,13 @@ The quality review results are as follows:
 
 <conditions>
 각 질문은 블릿 리스트로 답변해주세요.
+각 질문의 답변은 :white_check_mark: 또는 :x: 로만 표시해주세요.
 답변에 <questions>태그는 제외해주세요.
 </conditions>
 
 <example>
 품질검토 결과는 다음과 같습니다.
-- [첫 번째 질문?] :white_check_mark:
-- [두 번째 질문?] :white_check_mark:
-- [세 번째 질문?] :x:
+- 첫 번째 질문 :white_check_mark:
+- 두 번째 질문 :white_check_mark:
+- 세 번째 질문 :x:
 </example>
