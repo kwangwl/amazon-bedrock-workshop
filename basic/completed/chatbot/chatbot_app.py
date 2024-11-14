@@ -8,12 +8,12 @@ if 'chat_history' not in st.session_state:
     st.session_state.chat_history = []
 
 chat_container = st.container()
-input_text = st.chat_input("여기에서 챗봇과 채팅하세요")
+input_text = st.chat_input("Chat with the bot here")
 
 if input_text:
     st.session_state.chat_history.append({"role": "user", "content": [{"text": input_text}]})
 
-    with st.spinner("응답중..."):
+    with st.spinner("Responding..."):
         response = glib.get_response(st.session_state.chat_history)
         output = glib.handle_response(response)
 
