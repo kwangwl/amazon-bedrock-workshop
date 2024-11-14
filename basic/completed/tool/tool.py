@@ -35,13 +35,13 @@ tool_config = {
     ]
 }
 
-def get_response(ticker_symbol):
+def get_response(user_question):
     session = boto3.Session()
     bedrock = session.client(service_name='bedrock-runtime')
 
     response = bedrock.converse(
         modelId='anthropic.claude-3-5-sonnet-20240620-v1:0',
-        messages=[{"role": "user", "content": [{"text": f"What is the current price of {ticker_symbol} stock?"}]}],
+        messages=[{"role": "user", "content": [{"text": user_question}]}],
         toolConfig=tool_config
     )
     return response
@@ -55,8 +55,12 @@ def handle_tool_use(response):
                 print(f"Bedrock Response : {tool_request}")
 
                 if tool_use['name'] == 'get_stock_price':
-                    return get_stock_price(tool_use['input']['ticker'])
+                    ticker = tool_use['input']['ticker']
+                    return get_stock_price(ticker)
 
-response = get_response(sys.argv[1])
-stock_info = handle_tool_use(response)
-print(stock_info)
+    return response['output']['message']['content'][0]['text']
+
+user_question = sys.argv[1]
+response = get_response(user_question)
+result = handle_tool_use(response)
+print(result)
