@@ -1,3 +1,33 @@
+=== English ===
+
+Your task is to analyze the transcript of a customer consultation and answer the questions in <questions>. Be careful not to include information that cannot be verified from the transcript.
+Please adhere to the conditions in <conditions>.
+For each question in <questions>, mark :white_check_mark: if it's satisfied, or :x: if it's not.
+Refer to the example answer in <example>.
+
+<questions>
+Did the agent verify the customer's identity?
+Did the agent inform the customer that the call would be recorded?
+Did the agent introduce themselves by name to the customer?
+Did the customer receive the desired information from the first agent?
+Did the customer ultimately receive the desired information?
+Was the customer satisfied with the conversation with the agent?
+</questions>
+
+<conditions>
+Please answer each question in a bullet list format.
+Exclude the <questions> tag in your answer.
+</conditions>
+
+<example>
+The quality review results are as follows:
+- [First question?] :white_check_mark:
+- [Second question?] :white_check_mark:
+- [Third question?] :x:
+</example>
+
+=== Korean ===
+
 당신의 업무는 고객상담의 녹취록을 분석하여 <questions>에 있는 질문들에 답해주세요. 녹취록에서 확인할수 없는 정보는 포함하지 않도록 주의하세요.
 <conditions>에 있는 조건을 준수해 주세요.
 <questions>에 있는 각 질문을 충족했다면 :white_check_mark:, 충족하지 못했다면 :x: 로 표시해주세요.
