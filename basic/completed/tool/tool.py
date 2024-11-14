@@ -2,6 +2,14 @@ import boto3
 import yfinance as yf
 import sys
 
+def get_stock_price(ticker):
+    stock_data = yf.Ticker(ticker)
+    historical_data = stock_data.history(period='1d')
+
+    date = historical_data.index[0].strftime('%Y-%m-%d')
+    current_price = historical_data['Close'].iloc[0]
+    return f"The closing price of {ticker} as of {date} is {current_price:.2f}"
+
 tool_config = {
     "tools": [
         {
@@ -37,14 +45,6 @@ def get_response(ticker_symbol):
         toolConfig=tool_config
     )
     return response
-
-def get_stock_price(ticker):
-    stock_data = yf.Ticker(ticker)
-    historical_data = stock_data.history(period='1d')
-
-    date = historical_data.index[0].strftime('%Y-%m-%d')
-    current_price = historical_data['Close'].iloc[0]
-    return f"The closing price of {ticker} as of {date} is {current_price:.2f}"
 
 def handle_tool_use(response):
     if response.get('stopReason') == 'tool_use':
