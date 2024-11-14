@@ -4,7 +4,6 @@ import PyPDF2
 import numpy as np
 import faiss
 
-
 def create_embeddings(text):
     session = boto3.Session()
     bedrock = session.client(service_name='bedrock-runtime')
@@ -19,7 +18,6 @@ def create_embeddings(text):
     response_body = json.loads(response['body'].read())
     return np.array(response_body['embedding'])
 
-
 def load_pdf(file_path):
     text = ""
     with open(file_path, "rb") as file:
@@ -28,20 +26,17 @@ def load_pdf(file_path):
             text += page.extract_text()
     return text
 
-
 def create_text_splitter(text, chunk_size=1000, chunk_overlap=100):
     chunks = []
     for i in range(0, len(text), chunk_size - chunk_overlap):
         chunks.append(text[i:i + chunk_size])
     return chunks
 
-
 def create_vector_index(embeddings):
     dimension = embeddings[0].shape[0]
     index = faiss.IndexFlatL2(dimension)
     index.add(np.array(embeddings))
     return index
-
 
 def generate_rag_response(index, question, documents):
     session = boto3.Session()
@@ -56,13 +51,13 @@ def generate_rag_response(index, question, documents):
         "role": "user",
         "content": [
             {"text": rag_content},
-            {"text": "위 내용을 바탕으로 다음 질문에 답해주세요. 단 내용과 관련 없는 질문은 답변이 어렵다고 알려주세요."},
+            {"text": "Please answer the following question based on the above content. If the question is unrelated to the content, please inform that it's difficult to answer."},
             {"text": question}
         ]
     }
 
     response = llm.converse(
-        modelId="anthropic.claude-3-sonnet-20240229-v1:0",
+        modelId='anthropic.claude-3-5-sonnet-20240620-v1:0',
         messages=[message],
         inferenceConfig={
             "maxTokens": 2000,
