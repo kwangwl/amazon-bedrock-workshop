@@ -7,14 +7,14 @@ tool_config = {
         {
             "toolSpec": {
                 "name": "get_stock_price",
-                "description": "주어진 ticker의 현재 주식 가격을 가져옵니다.",
+                "description": "Retrieves the current stock price for the given ticker.",
                 "inputSchema": {
                     "json": {
                         "type": "object",
                         "properties": {
                             "ticker": {
                                 "type": "string",
-                                "description": "주식의 ticker"
+                                "description": "Stock ticker"
                             }
                         },
                         "required": [
@@ -32,8 +32,8 @@ def get_response(ticker_symbol):
     bedrock = session.client(service_name='bedrock-runtime')
 
     response = bedrock.converse(
-        modelId='anthropic.claude-3-sonnet-20240229-v1:0',  # 실제 모델 ID로 교체
-        messages=[{"role": "user", "content": [{"text": f"{ticker_symbol} 주식의 현재 가격은 얼마입니까?"}]}],
+        modelId='anthropic.claude-3-5-sonnet-20240620-v1:0',
+        messages=[{"role": "user", "content": [{"text": f"What is the current price of {ticker_symbol} stock?"}]}],
         toolConfig=tool_config
     )
     return response
@@ -44,7 +44,7 @@ def get_stock_price(ticker):
 
     date = historical_data.index[0].strftime('%Y-%m-%d')
     current_price = historical_data['Close'].iloc[0]
-    return f"{ticker} 종가는 {date} 기준 {current_price:.2f}입니다"
+    return f"The closing price of {ticker} as of {date} is {current_price:.2f}"
 
 def handle_tool_use(response):
     if response.get('stopReason') == 'tool_use':
