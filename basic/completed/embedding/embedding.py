@@ -4,7 +4,6 @@ import sys
 from numpy import dot
 from numpy.linalg import norm
 
-
 def get_embedding(text):
     session = boto3.Session()
     bedrock = session.client(service_name='bedrock-runtime')
@@ -19,7 +18,6 @@ def get_embedding(text):
     response_body = json.loads(response['body'].read())
     return response_body['embedding']
 
-
 class EmbedItem:
     def __init__(self, text):
         self.text = text
@@ -30,10 +28,8 @@ class ComparisonResult:
         self.text = text
         self.similarity = similarity
 
-
 def calculate_similarity(a, b):
     return dot(a, b) / (norm(a) * norm(b))
-
 
 with open("items.txt", "r") as f:
     text_items = f.read().splitlines()
@@ -44,7 +40,7 @@ for text in text_items:
 
 input_item = EmbedItem(sys.argv[1])
 
-print(f"유사도 정렬 : '{input_item.text}'")
+print(f"Similarity Sorting : '{input_item.text}'")
 print("----------------")
 cosine_comparisons = []
 
