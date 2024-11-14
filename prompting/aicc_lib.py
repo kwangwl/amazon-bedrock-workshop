@@ -19,7 +19,7 @@ def get_streaming_response(prompt_input, transcription_text, response_placeholde
     }
 
     response = bedrock.converse_stream(
-        modelId="anthropic.claude-3-sonnet-20240229-v1:0",
+        modelId='anthropic.claude-3-5-sonnet-20240620-v1:0',
         messages=[message],
         inferenceConfig={
             "maxTokens": 2000,
