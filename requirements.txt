@@ -4,3 +4,4 @@ streamlit
 PyPDF2
 faiss-cpu
 yfinance
+plotly
