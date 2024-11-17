@@ -35,7 +35,7 @@ scenario_name = st.selectbox(
 st.write(LANG[lang][scenario_name]['description'])
 
 # Button for generating response and reading prompt to generate response
-if st.button(LANG[lang][scenario_name]['name']):
+if st.button(LANG[lang]['generate']):
     response_placeholder = st.empty()
     with open(f"practice/{LANG[lang][scenario_name]['file']}", 'r', encoding='utf-8') as file:
         prompt = file.read()
