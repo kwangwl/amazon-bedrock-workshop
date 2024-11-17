@@ -1,104 +1,97 @@
 import pandas as pd
 import streamlit as st
 
-
 def add_result(results, category, details):
-    status = "⚠️ Blocked" if details else "✅ 통과"
+    status = "⚠️ Filtered" if details else "✅ OK"
     details_str = ", ".join(details) if details else "-"
 
     results.append({
-        "Category": category,
-        "Test result": status,
+        "Check": category,
+        "Result": status,
         "Details": details_str
     })
 
-
 def display_guardrail_result_table(trace_container, assessment):
-    """
-    가드레일 결과를 테이블 형태로 표시하는 함수
-    """
+    """ Show guardrail results in a table """
     results = []
 
-    # Word Policy 검사
+    # Word Policy check
     if 'wordPolicy' in assessment:
         details = []
         for word in assessment['wordPolicy'].get('customWords', []):
             if word.get('action') == 'BLOCKED':
-                details.append(f"Detected '{word['match']}' word")
-        add_result(results, "Word filters", details)
+                details.append(f"Found '{word['match']}'")
+        add_result(results, "Word check", details)
 
-    # Sensitive Information Policy 검사
+    # Sensitive Information check
     if 'sensitiveInformationPolicy' in assessment:
         details = []
         for regex in assessment['sensitiveInformationPolicy'].get('regexes', []):
             if regex.get('action') == 'BLOCKED':
-                details.append(f"Detected regex pattern '{regex['name']}'")
+                details.append(f"Found '{regex['name']}' pattern")
 
         for pii in assessment['sensitiveInformationPolicy'].get('piiEntities', []):
             if pii.get('action') in ['BLOCKED', 'ANONYMIZED']:
-                details.append(f"Detected {pii['type']}")
+                details.append(f"Found {pii['type']}")
 
-        add_result(results, "Sensitive information filters", details)
+        add_result(results, "Sensitive info check", details)
 
-    # Content Policy 검사
+    # Content check
     if 'contentPolicy' in assessment:
         details = []
         for filter in assessment['contentPolicy'].get('filters', []):
             if filter.get('action') == 'BLOCKED':
-                details.append(f"Detected {filter['type']} content")
+                details.append(f"Found {filter['type']} content")
 
-        add_result(results, "Content filters", details)
+        add_result(results, "Content check", details)
 
-    # Topic Policy 검사
+    # Topic check
     if 'topicPolicy' in assessment:
         details = []
         for topic in assessment['topicPolicy'].get('topics', []):
             if topic.get('action') == 'BLOCKED':
-                details.append(f"Detected {topic['name']} topic")
+                details.append(f"Found {topic['name']} topic")
 
-        add_result(results, "Topic filters", details)
+        add_result(results, "Topic check", details)
 
-    # Contextual Grounding Policy 검사
+    # Context check
     if 'contextualGroundingPolicy' in assessment:
         details = []
         for filter in assessment['contextualGroundingPolicy'].get('filters', []):
             if filter.get('action') == 'BLOCKED':
                 details.append(f"Failed {filter['type']} check")
 
-        add_result(results, "Contextual grounding filters", details)
+        add_result(results, "Context check", details)
 
     if results:
         df = pd.DataFrame(results)
         trace_container.dataframe(df, hide_index=True, use_container_width=True)
 
-
 def display_guardrail_trace(trace_container, guardrail_trace):
-    """
-    가드레일 트레이스 정보를 표시하는 메인 함수
-    """
+    """ Show guardrail trace info """
     action = guardrail_trace.get('action')
 
     if 'inputAssessments' in guardrail_trace:
         with trace_container.chat_message("ai"):
-            st.markdown("Bedrock Guardrails 검사 수행 (입력)")
+            st.markdown("Checking input...")
 
         if action == "NONE":
-            trace_container.success("✅ 통과")
+            trace_container.success("✅ Input OK")
 
         if action == "INTERVENED":
-            trace_container.warning("⚠️ 제한 조치 발생")
+            trace_container.warning("⚠️ Input filtered")
             for assessment in guardrail_trace.get('inputAssessments', []):
                 display_guardrail_result_table(trace_container, assessment)
 
     else:
         # 'outputAssessments' in guardrail_trace:
         with trace_container.chat_message("ai"):
-            st.markdown("Bedrock Guardrails 검사 수행 (출력)")
+            st.markdown("Checking output...")
 
         if action == "NONE":
-            trace_container.success("✅ 통과")
+            trace_container.success("✅ Output OK")
 
         if action == "INTERVENED":
-            trace_container.warning("⚠️ 제한 조치 발생")
+            trace_container.warning("⚠️ Output filtered")
             for assessment in guardrail_trace.get('outputAssessments', []):
                 display_guardrail_result_table(trace_container, assessment)
