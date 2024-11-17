@@ -73,7 +73,7 @@ def display_guardrail_trace(trace_container, guardrail_trace):
 
     if 'inputAssessments' in guardrail_trace:
         with trace_container.chat_message("ai"):
-            st.markdown("Checking input...")
+            st.markdown("Bedrock Guradrails: Checking input...")
 
         if action == "NONE":
             trace_container.success("✅ Input OK")
@@ -86,7 +86,7 @@ def display_guardrail_trace(trace_container, guardrail_trace):
     else:
         # 'outputAssessments' in guardrail_trace:
         with trace_container.chat_message("ai"):
-            st.markdown("Checking output...")
+            st.markdown("Bedrock Guradrails: Check output...")
 
         if action == "NONE":
             trace_container.success("✅ Output OK")
