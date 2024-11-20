@@ -19,7 +19,7 @@
 
 1. **[Bedrock 기능 및 패턴](bedrock_basic_workshop/README.md)** : Bedrock의 기본 기능을 이해하고 간단한 애플리케이션을 실습합니다.
 2. **[프롬프트 엔지니어링](aicc_prompting_workshop/README.md)** : 자동차 보험 센터(AICC)를 기준으로 프롬프트 엔지니어링 방법을 배우고 실습합니다.
-3. **[Bedrock Agent 어플리케이션](stock_agent_workshop/README.md)****Bedrock Agent 어플리케이션** : Bedrock Agent를 활용하여 주식 분석 어플리케이션을 구축합니다.
+3. **[Bedrock Agent 어플리케이션](stock_agent_workshop/README.md)** : Bedrock Agent를 활용하여 주식 분석 어플리케이션을 구축합니다.
 
 ### 수행 시간
 
