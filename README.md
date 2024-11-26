@@ -1,4 +1,4 @@
-# Amazon Bedrock Workshop - Advanced
+# Amazon Bedrock Agent Workshop: Advanced Stock Analysis & AICC
 
 > **안내**: 이 저장소는 Amazon Bedrock 워크샵의 실습 코드만을 포함하고 있습니다. 
 > 실제 워크샵 수행과 상세한 가이드를 위해서는 아래 링크의 전체 워크샵 페이지를 참조해 주세요.
