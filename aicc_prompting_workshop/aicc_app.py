@@ -18,7 +18,7 @@ lang = 'en' if language == 'English' else 'ko'
 st.title(LANG[lang]['main_title'])
 
 # Display the transcript in an expandable area
-transcription_file = f"../dataset/aicc_transcription_{lang}.txt"
+transcription_file = f"../dataset/resources/aicc_transcription_{lang}.txt"
 with open(transcription_file, 'r', encoding='utf-8') as file:
     transcription_text = file.read()
 
